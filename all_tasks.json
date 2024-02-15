@@ -1,65 +1,22 @@
 {
-    "332747": {
-        "task_id": 332747,
-        "task_name": "Task 2",
-        "task_description": "Description 2",
-        "task_subtasks": []
-    },
-    "349553": {
-        "task_id": 349553,
-        "task_name": "Task 2",
-        "task_description": "Description 2",
-        "task_subtasks": []
-    },
-    "165021": {
-        "task_id": 165021,
-        "task_name": "Task 2",
-        "task_description": "Description 2",
-        "task_subtasks": [
-            {
-                "task_id": 401618,
-                "task_name": "Task 2",
-                "task_description": "Description 2",
-                "task_subtasks": [
-                    {
-                        "task_id": 163720,
-                        "task_name": "Task 2",
-                        "task_description": "Description 2",
-                        "task_subtasks": []
-                    },
-                    {
-                        "task_id": 417168,
-                        "task_name": "Task 2",
-                        "task_description": "Description 2",
-                        "task_subtasks": []
-                    }
-                ]
-            },
-            {
-                "task_id": 428548,
-                "task_name": "Task 2",
-                "task_description": "Description 2",
-                "task_subtasks": []
-            },
-            {
-                "task_id": 774701,
-                "task_name": "Task 2",
-                "task_description": "Description 2",
-                "task_subtasks": [
-                    {
-                        "task_id": 280218,
-                        "task_name": "Task 2",
-                        "task_description": "Description 2",
-                        "task_subtasks": []
-                    }
-                ]
-            }
-        ]
-    },
-    "239254": {
-        "task_id": 239254,
-        "task_name": "Task 2",
-        "task_description": "Description 2",
-        "task_subtasks": []
-    }
+    "all_tasks": [
+        {
+            "task_id": 1,
+            "task_name": "default task name",
+            "task_description": "default description",
+            "task_subtasks": []
+        },
+        {
+            "task_id": 53094,
+            "task_name": "kkk",
+            "task_description": "kkk 2",
+            "task_subtasks": []
+        },
+        {
+            "task_id": 992525,
+            "task_name": "kkk",
+            "task_description": "kkk 2",
+            "task_subtasks": []
+        }
+    ]
 }
