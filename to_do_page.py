@@ -1,11 +1,111 @@
+import json
+
 import flet as ft
 import tasks as tsk
+from flet import *
+import os
+from all_variables import storage_file_path
+
+
+def check_storage_file():
+    if not os.path.exists(storage_file_path):
+        with open(storage_file_path, "w", encoding='utf-8') as new_file:
+            json.dump({"all_tasks": [
+                {
+                    "task_id": 1,
+                    "task_name": "default task name",
+                    "task_description": "default description",
+                    "task_subtasks": []
+                }
+            ]}, new_file, indent=4)
+
+
+def create_one_task_card_ui(one_task: dict) -> ft.Card:
+    task_control_buttons = ft.Row(
+        alignment=MainAxisAlignment.SPACE_BETWEEN,
+        controls=[
+            ft.Row(
+                spacing=0,
+                controls=[
+                    ft.IconButton(icons.PLAYLIST_ADD_CHECK_CIRCLE_OUTLINED),
+                    ft.IconButton(icons.PLAYLIST_ADD_CHECK_CIRCLE_OUTLINED),
+                    ft.IconButton(icons.HIGHLIGHT_REMOVE),
+                ],
+            ),
+            ft.Row(
+                spacing=0,
+                controls=[
+                    ft.IconButton(icons.ADD),
+                    ft.IconButton(icons.START),
+                    ft.IconButton(icons.STAR),
+                ],
+            )
+        ]
+    )
+
+    task_info = ft.ListTile(
+        title=ft.Text(one_task['task_name']),
+        subtitle=ft.Text(
+            value=one_task['task_description'],
+            italic=True
+        )
+    )
+
+    one_task_card = ft.Card(
+        content=ft.Container(ft.Column(
+            spacing=0,
+            alignment=MainAxisAlignment.SPACE_BETWEEN,
+            wrap=False,
+            controls=[
+                task_control_buttons,
+                task_info,
+            ],
+        )))
+    return one_task_card
+
+
+def create_main_tasks_list_ui(all_tasks: dict) -> ft.Column:
+    """take a list of all tasks and create UI for each task without subtasks, add in Column controls and return its"""
+    main_wrapper = ft.Column(
+        scroll=ScrollMode.AUTO
+    )
+    for task in all_tasks['all_tasks']:
+        one_card = create_one_task_card_ui(task)
+        main_wrapper.controls.append(one_card)
+    return main_wrapper
+
+
+def task_tabs_section():
+    return ft.Tabs(
+        selected_index=0,
+        animation_duration=300,
+        # width=400,
+        height=400,
+        tabs=[
+            ft.Tab(
+                text="Main tasks",
+                content=create_main_tasks_list_ui(tsk.load_tasks())
+                # content=ft.Container(
+                #     content=create_main_tasks_list_ui(tsk.load_tasks())
+                # ),
+            ),
+            ft.Tab(
+                tab_content=ft.Icon(ft.icons.SEARCH),
+                content=ft.Text("This is Tab 2"),
+            ),
+            ft.Tab(
+                text="Tab 3",
+                icon=ft.icons.SETTINGS,
+                content=ft.Text("This is Tab 3"),
+            ),
+        ],
+    )
 
 
 class TodoTaskPage(ft.UserControl):
     def __init__(self):
         super().__init__()
-        self.page_title = 'Todo page'
+        self.page_title = ''
         self.task_name_hint = 'Task name'
         self.task_description_hint = 'Task description'
         self.save_button_text = 'save'
@@ -15,9 +115,10 @@ class TodoTaskPage(ft.UserControl):
         self.all_loaded_tasks = None
 
     def build(self):
+        check_storage_file()
         page_title = ft.Text(value=self.page_title, )
         created_task_section = self.create_task_section()
-        created_tasks_tab_section = self.task_tabs_section()
+        created_tasks_tab_section = task_tabs_section()
 
         page_content = ft.Column(
             controls=[
@@ -29,68 +130,60 @@ class TodoTaskPage(ft.UserControl):
         return page_content
 
     def create_task_section(self) -> ft.Column:
+        """UI section to collect data for new task and save it"""
         self.new_task_name = ft.TextField(hint_text=self.task_name_hint)
         self.new_task_description = ft.TextField(hint_text=self.task_description_hint)
         save_task_button = ft.ElevatedButton(text=self.save_button_text, on_click=self.save_task)
-        load_tasks_button = ft.ElevatedButton(text="load_tasks", on_click=self.load_all_tasks)
+        clear_task_fields = ft.ElevatedButton(text="clear", on_click=self.clear_creation_task_fields)
 
         created_task_section = ft.Column(
             controls=[
                 self.new_task_name,
                 self.new_task_description,
-                save_task_button,
-                load_tasks_button,
+                ft.Row([save_task_button, clear_task_fields, ])
             ]
         )
         return created_task_section
 
     def save_task(self, e):
+        self.all_loaded_tasks = tsk.load_tasks()
         if self.new_task_name.value:
             new_task_name = self.new_task_name.value
             new_task_description = self.new_task_description.value
-            self.clear_creation_task_fields()
+            self.clear_creation_task_fields(e)
             print(new_task_name, new_task_description)
+            tsk.task_crud(
+                self.all_loaded_tasks,
+                new_task_name,
+                new_task_description,
+                None,
+                operation_type='adding'
+            )
         else:
             print(f"task name can't be empty")
 
-    # def create_ui_one_loaded_task(self):
-
-    def load_all_tasks(self, e):
-        loaded_tasks = tsk.load_tasks()
-        print(loaded_tasks)
-
-    def clear_creation_task_fields(self):
+    def clear_creation_task_fields(self, e):
         self.new_task_name.value = ''
         self.new_task_description.value = ''
         self.new_task_name.update()
         self.new_task_description.update()
 
-    def task_tabs_section(self):
-        return ft.Tabs(
-            selected_index=1,
-            animation_duration=300,
-            tabs=[
-                ft.Tab(
-                    text="Tab 1",
-                    content=ft.Container(
-                        content=ft.Text("This is Tab 1"), alignment=ft.alignment.center
-                    ),
-                ),
-                ft.Tab(
-                    tab_content=ft.Icon(ft.icons.SEARCH),
-                    content=ft.Text("This is Tab 2"),
-                ),
-                ft.Tab(
-                    text="Tab 3",
-                    icon=ft.icons.SETTINGS,
-                    content=ft.Text("This is Tab 3"),
-                ),
-            ],
-            width=400,
-            height=400,
-        )
 
-
-def create_to_do_page_content():
-    tst = TodoTaskPage()
-    return tst
+def create_to_do_page_content(one_page):
+    check_storage_file()
+    created_task_section = TodoTaskPage().create_task_section()
+    return Column(
+        controls=[
+            TextButton('go home', on_click=lambda _: one_page.go('/')),
+            Column(
+                controls=[
+                    created_task_section,
+                    task_tabs_section(),
+                    Text(value="================="),
+                ]),
+            TextButton('go home2', on_click=lambda _: one_page.go('/')),
+            Text(value="Second Page"),
+            Text(value="Second Page"),
+            Text(value="Second Page"),
+        ],
+    )

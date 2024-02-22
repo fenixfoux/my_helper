@@ -6,10 +6,10 @@ from second_page_content import create_second_page_content
 from to_do_page_before_changes import create_to_do_page_content_before_changes
 
 
-def main(page: Page):
-    main_page_content = create_main_page_content(page)
-    first_page_content = create_to_do_page_content()
-    second_page_content = create_second_page_content(page)
+def main(one_page: Page):
+    main_page_content = create_main_page_content(one_page)
+    to_do_page_content = create_to_do_page_content(one_page)
+    second_page_content = create_second_page_content(one_page)
     todo_page_before_changes = create_to_do_page_content_before_changes()
 
     pages = {
@@ -19,7 +19,8 @@ def main(page: Page):
         ),
         '/todo_page': View(
             "todo_page",
-            [first_page_content],
+            [to_do_page_content],
+            scroll=ScrollMode.AUTO
         ),
         '/page_2': View(
             'page_2',
@@ -32,14 +33,14 @@ def main(page: Page):
     }
 
     def route_change(route):
-        page.views.clear()
-        page.views.append(
-            pages[page.route]
+        one_page.views.clear()
+        one_page.views.append(
+            pages[one_page.route]
         )
-    page.add(main_page_content)
+    one_page.add(main_page_content)
 
-    page.on_route_change = route_change
-    page.go(page.route)
+    one_page.on_route_change = route_change
+    one_page.go(one_page.route)
 
 
 app(target=main)

@@ -79,12 +79,12 @@ def save_tasks_to_json(tasks):
 
 def load_tasks():
     try:
-        with open("all_tasks.json", "r") as json_file:
+        with open("all_tasks.json", "r", encoding='utf-8') as json_file:
             tasks_data = json.load(json_file)
             return tasks_data
-    except FileNotFoundError: # todo: написать функцию проверочную если файл есть, если нет то создать и потом запрашивать данные чтоб не выбивало ошибку при первом запуске
+    except FileNotFoundError:
         print("File not found. Creating a new file.")
-        with open("all_tasks.json", "w") as new_file:
+        with open("all_tasks.json", "w", encoding='utf-8') as new_file:
             json.dump({"all_tasks":[
                 {
                     "task_id": 1,
@@ -96,11 +96,11 @@ def load_tasks():
         return {}
 
 
-all_existing_tasks = load_tasks()
+# all_existing_tasks = load_tasks()
 
 # create_and_add_task(all_existing_tasks, "kkk", "kkk 2")
 # task_crud(all_existing_tasks, "kkk", "kkk 2", None, operation_type='asdfd')
-task_crud(all_existing_tasks, "kkk", "kkk 2", None, operation_type='adding')
+# task_crud(all_existing_tasks, "kkk", "kkk 2", None, operation_type='adding')
 # task_crud(all_existing_tasks, "kkk", "kkk 2", 950703, operation_type='adding')
 # task_crud(all_existing_tasks, "kkk", "kkk 2", 758067, operation_type='adding')
 # task_crud(all_existing_tasks, "Kupite xxxx", "kxxxd", 2, operation_type='deleting')
