@@ -64,44 +64,6 @@ def create_one_task_card_ui(one_task: dict) -> ft.Card:
     return one_task_card
 
 
-def create_main_tasks_list_ui(all_tasks: dict) -> ft.Column:
-    """take a list of all tasks and create UI for each task without subtasks, add in Column controls and return its"""
-    main_wrapper = ft.Column(
-        scroll=ScrollMode.AUTO
-    )
-    for task in all_tasks['all_tasks']:
-        one_card = create_one_task_card_ui(task)
-        main_wrapper.controls.append(one_card)
-    return main_wrapper
-
-
-def task_tabs_section():
-    return ft.Tabs(
-        selected_index=0,
-        animation_duration=300,
-        # width=400,
-        height=400,
-        tabs=[
-            ft.Tab(
-                text="Main tasks",
-                content=create_main_tasks_list_ui(tsk.load_tasks())
-                # content=ft.Container(
-                #     content=create_main_tasks_list_ui(tsk.load_tasks())
-                # ),
-            ),
-            ft.Tab(
-                tab_content=ft.Icon(ft.icons.SEARCH),
-                content=ft.Text("This is Tab 2"),
-            ),
-            ft.Tab(
-                text="Tab 3",
-                icon=ft.icons.SETTINGS,
-                content=ft.Text("This is Tab 3"),
-            ),
-        ],
-    )
-
-
 class TodoTaskPage(ft.UserControl):
     def __init__(self):
         super().__init__()
@@ -112,13 +74,16 @@ class TodoTaskPage(ft.UserControl):
         self.new_task_name = None
         self.new_task_description = None
         self.new_task_date_complete = None
-        self.all_loaded_tasks = None
+        self.all_loaded_tasks = tsk.load_tasks()
+        # self.main_tabs_wrapper = ft.Column()
+        self.main_tab_wrapper = self.create_main_tasks_list_ui()
+
 
     def build(self):
         check_storage_file()
         page_title = ft.Text(value=self.page_title, )
         created_task_section = self.create_task_section()
-        created_tasks_tab_section = task_tabs_section()
+        created_tasks_tab_section = self.task_tabs_section()
 
         page_content = ft.Column(
             controls=[
@@ -129,18 +94,53 @@ class TodoTaskPage(ft.UserControl):
         )
         return page_content
 
+    def create_main_tasks_list_ui(self) -> ft.Column:
+        """take a list of all tasks and create UI for each task without subtasks, add in Column controls and return
+        its"""
+        main_wrapper = ft.Column(
+            scroll=ScrollMode.AUTO
+        )
+        for task in self.all_loaded_tasks['all_tasks']:
+            one_card = create_one_task_card_ui(task)
+            main_wrapper.controls.append(one_card)
+        return main_wrapper
+
+    def task_tabs_section(self):
+        return ft.Tabs(
+            selected_index=0,
+            animation_duration=300,
+            # width=400,
+            height=400,
+            tabs=[
+                ft.Tab(
+                    text="Main tasks",
+                    content=self.main_tab_wrapper
+                ),
+                ft.Tab(
+                    tab_content=ft.Icon(ft.icons.SEARCH),
+                    content=ft.Text("This is Tab 2"),
+                ),
+                ft.Tab(
+                    text="Tab 3",
+                    icon=ft.icons.SETTINGS,
+                    content=ft.Text("This is Tab 3"),
+                ),
+            ],
+        )
+
     def create_task_section(self) -> ft.Column:
         """UI section to collect data for new task and save it"""
         self.new_task_name = ft.TextField(hint_text=self.task_name_hint)
         self.new_task_description = ft.TextField(hint_text=self.task_description_hint)
         save_task_button = ft.ElevatedButton(text=self.save_button_text, on_click=self.save_task)
         clear_task_fields = ft.ElevatedButton(text="clear", on_click=self.clear_creation_task_fields)
+        test_add_field_button = ft.ElevatedButton(text="add ui", on_click=self.test_add_fields)
 
         created_task_section = ft.Column(
             controls=[
                 self.new_task_name,
                 self.new_task_description,
-                ft.Row([save_task_button, clear_task_fields, ])
+                ft.Row([save_task_button, clear_task_fields, test_add_field_button])
             ]
         )
         return created_task_section
@@ -159,6 +159,10 @@ class TodoTaskPage(ft.UserControl):
                 None,
                 operation_type='adding'
             )
+            self.all_loaded_tasks = tsk.load_tasks()  # update all tasks list
+            print(self.all_loaded_tasks)
+            self.main_tab_wrapper = self.create_main_tasks_list_ui()
+            self.update()
         else:
             print(f"task name can't be empty")
 
@@ -168,17 +172,22 @@ class TodoTaskPage(ft.UserControl):
         self.new_task_name.update()
         self.new_task_description.update()
 
+    def test_add_fields(self, e):
+        print('button test_add_field_button was clicked')
+
 
 def create_to_do_page_content(one_page):
     check_storage_file()
-    created_task_section = TodoTaskPage().create_task_section()
+    todo_page = TodoTaskPage()
+    created_task_section = todo_page.create_task_section()
+    created_tab_section = todo_page.task_tabs_section()
     return Column(
         controls=[
             TextButton('go home', on_click=lambda _: one_page.go('/')),
             Column(
                 controls=[
                     created_task_section,
-                    task_tabs_section(),
+                    created_tab_section,
                     Text(value="================="),
                 ]),
             TextButton('go home2', on_click=lambda _: one_page.go('/')),
@@ -187,3 +196,10 @@ def create_to_do_page_content(one_page):
             Text(value="Second Page"),
         ],
     )
+
+
+# # ===== TESTING ===== #
+# def main(page: Page):
+#     page.add(create_to_do_page_content(View))
+#
+# ft.app(target=main)
