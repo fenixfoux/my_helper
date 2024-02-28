@@ -1,14 +1,17 @@
 import flet as ft
 from flet import *
 from main_page_content import create_main_page_content
-from to_do_page import create_to_do_page_content
+
+from todo_page import TodoTaskPageUI
+
 from second_page_content import create_second_page_content
 from to_do_page_before_changes import create_to_do_page_content_before_changes
 
 
 def main(one_page: Page):
+    to_do_page_content = TodoTaskPageUI().create_todo_task_page()
     main_page_content = create_main_page_content(one_page)
-    to_do_page_content = create_to_do_page_content(one_page)
+    # to_do_page_content = create_to_do_page_content(one_page)
     second_page_content = create_second_page_content(one_page)
     todo_page_before_changes = create_to_do_page_content_before_changes()
 

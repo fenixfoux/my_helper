@@ -12,7 +12,33 @@ default_list_of_tasks = {
             "task_id": 699130,
             "task_name": "123",
             "task_description": "432142",
-            "task_subtasks": []
+            "task_subtasks": [
+                {
+                    "task_id": 845182,
+                    "task_name": "unnamed task",
+                    "task_description": "unnamed description",
+                    "task_subtasks": []
+                },
+                {
+                    "task_id": 462169,
+                    "task_name": "desfr",
+                    "task_description": "aaaaa",
+                    "task_subtasks": []
+                }
+            ]
+        },
+        {
+            "task_id": 263379,
+            "task_name": "55",
+            "task_description": "555",
+            "task_subtasks": [
+                {
+                    "task_id": 66,
+                    "task_name": "666666",
+                    "task_description": "66",
+                    "task_subtasks": []
+                }
+            ]
         }
     ]
 }

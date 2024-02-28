@@ -1,7 +1,10 @@
 import json
+import os
 import random
+import all_variables as all_vars
 
 ALL_EXISTING_KEYS = []
+
 
 # todo: refactor code to use class object instead of dictionaries when will wil change storage from json to sqlite3
 def generate_unique_task_id(existing_task_ids):
@@ -11,12 +14,29 @@ def generate_unique_task_id(existing_task_ids):
             return new_task_id
 
 
-def get_all_existing_keys(all_tasks: list):
-    global ALL_EXISTING_KEYS
+# def get_all_existing_keys(all_tasks: list):
+#     global ALL_EXISTING_KEYS
+#     for task in all_tasks:
+#         ALL_EXISTING_KEYS.append(task['task_id'])
+#         if task['task_subtasks']:
+#             get_all_existing_keys(task['task_subtasks'])
+
+def get_all_existing_keys(all_tasks: list, all_existing_keys):
     for task in all_tasks:
-        ALL_EXISTING_KEYS.append(task['task_id'])
+        all_existing_keys.append(task['task_id'])
         if task['task_subtasks']:
-            get_all_existing_keys(task['task_subtasks'])
+            get_all_existing_keys(task['task_subtasks'], all_existing_keys)
+    return all_existing_keys
+
+
+def find_task_by_id(all_tasks: list, task_id):
+    for task in all_tasks:
+        if task['task_id'] == task_id:
+            # print(task)
+            return task
+        elif task['task_subtasks']:
+            find_task_by_id(task['task_subtasks'], task_id)
+    return None
 
 
 def modify_task_recursive(new_task: dict, tasks: list, parent_task_id, operation_type):
@@ -40,12 +60,42 @@ def modify_task_recursive(new_task: dict, tasks: list, parent_task_id, operation
             modify_task_recursive(new_task, task['task_subtasks'], parent_task_id, operation_type)
 
 
-def task_crud(main_list_tasks, task_name, task_description, parent_task_id=None, operation_type=''):
-    get_all_existing_keys(main_list_tasks['all_tasks'])
-    print(f"all existed task_id: {ALL_EXISTING_KEYS}")
+# def task_crud(main_list_tasks, task_name, task_description, parent_task_id=None, operation_type=''):
+#     get_all_existing_keys(main_list_tasks['all_tasks'])
+#     print(f"all existed task_id: {ALL_EXISTING_KEYS}")
+#
+#     temp_task = {
+#         "task_id": generate_unique_task_id(ALL_EXISTING_KEYS),
+#         "task_name": task_name,
+#         "task_description": task_description,
+#         "task_subtasks": []
+#     }
+#     if parent_task_id is None:
+#         if operation_type == 'adding':
+#             main_list_tasks['all_tasks'].append(temp_task)
+#         else:
+#             print(f"without parent_task_id is available only 'adding' operation."
+#                   f"actual provided operation_type: '{operation_type}'")
+#             return
+#     else:
+#         if operation_type in ['modify', 'deleting']:
+#             if parent_task_id not in ALL_EXISTING_KEYS:
+#                 print(f"there isn't any task with provided parent id: '{parent_task_id}'")
+#                 return
+#             else:
+#                 temp_task['task_id'] = parent_task_id
+#         modify_task_recursive(
+#             new_task=temp_task,
+#             tasks=main_list_tasks['all_tasks'],
+#             parent_task_id=parent_task_id,
+#             operation_type=operation_type)
+#     save_tasks_to_json(main_list_tasks)
+def task_crud(main_list_tasks, task_id, task_name, task_description, parent_task_id=None, operation_type=''):
+    # get_all_existing_keys(main_list_tasks['all_tasks'])
+    # print(f"all existed task_id: {ALL_EXISTING_KEYS}")
 
     temp_task = {
-        "task_id": generate_unique_task_id(ALL_EXISTING_KEYS),
+        "task_id": task_id,
         "task_name": task_name,
         "task_description": task_description,
         "task_subtasks": []
@@ -58,12 +108,12 @@ def task_crud(main_list_tasks, task_name, task_description, parent_task_id=None,
                   f"actual provided operation_type: '{operation_type}'")
             return
     else:
-        if operation_type in ['modify', 'deleting']:
-            if parent_task_id not in ALL_EXISTING_KEYS:
-                print(f"there isn't any task with provided parent id: '{parent_task_id}'")
-                return
-            else:
-                temp_task['task_id'] = parent_task_id
+        # if operation_type in ['modify', 'deleting']:
+        #     if parent_task_id not in ALL_EXISTING_KEYS:
+        #         print(f"there isn't any task with provided parent id: '{parent_task_id}'")
+        #         return
+        #     else:
+        #         temp_task['task_id'] = parent_task_id
         modify_task_recursive(
             new_task=temp_task,
             tasks=main_list_tasks['all_tasks'],
@@ -77,6 +127,19 @@ def save_tasks_to_json(tasks):
         json.dump(tasks, json_file, indent=4)
 
 
+def check_storage_file():
+    if not os.path.exists(all_vars.storage_file_path):
+        with open(all_vars.storage_file_path, "w", encoding='utf-8') as new_file:
+            json.dump({"all_tasks": [
+                {
+                    "task_id": 1,
+                    "task_name": "default task name",
+                    "task_description": "default description",
+                    "task_subtasks": []
+                }
+            ]}, new_file, indent=4)
+
+
 def load_tasks():
     try:
         with open("all_tasks.json", "r", encoding='utf-8') as json_file:
@@ -85,7 +148,7 @@ def load_tasks():
     except FileNotFoundError:
         print("File not found. Creating a new file.")
         with open("all_tasks.json", "w", encoding='utf-8') as new_file:
-            json.dump({"all_tasks":[
+            json.dump({"all_tasks": [
                 {
                     "task_id": 1,
                     "task_name": "default task name",
@@ -94,7 +157,6 @@ def load_tasks():
                 }
             ]}, new_file, indent=4)
         return {}
-
 
 # all_existing_tasks = load_tasks()
 
