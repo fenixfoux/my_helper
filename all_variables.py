@@ -48,9 +48,40 @@ page_name_eng = 'Todo page'
 new_task_name_hint_eng = 'New task name'
 new_task_description_hint_eng = 'New task description'
 
+
+all_operation_types = {
+    'add': 'adding',
+    'update': 'modify',
+    'delete': 'deleting',
+}
+
 button_back_text_eng = 'back'
 save_new_task_button_text_eng = 'save'
 clear_fields_new_task_button_text_eng = 'clear'
 test_button_text_eng = 'test'
 
 all_tab_names_eng = ['all', 'active', 'completed']
+
+
+# modal window texts
+title_of_the_task_modification_modal_window = 'edit task'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

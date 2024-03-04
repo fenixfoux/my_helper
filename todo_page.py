@@ -10,6 +10,7 @@ import tasks as tsk
 class TodoTaskPageUI(ft.UserControl):
     def __init__(self):
         super().__init__()
+        self.created_page = None
         self.some_value = ""
         self.page_name = all_vars.page_name_eng
         self.tab_page_names = all_vars.all_tab_names_eng
@@ -23,7 +24,7 @@ class TodoTaskPageUI(ft.UserControl):
         self.new_task_description_field = None
         self.all_tabs = None
 
-    def create_new_task_section(self):
+    def create_new_task_section(self) -> ft.Column:
         self.new_task_name_field = TextField(hint_text=all_vars.new_task_name_hint_eng)
         self.new_task_description_field = ft.TextField(hint_text=all_vars.new_task_description_hint_eng)
         return ft.Column([
@@ -44,19 +45,22 @@ class TodoTaskPageUI(ft.UserControl):
                             self.new_task_name_field.value,
                             self.new_task_description_field.value,
                             None,
-                            'adding'
+                            all_vars.all_operation_types['add']
                         )
 
                     ),
                     ft.ElevatedButton(
                         text=all_vars.clear_fields_new_task_button_text_eng,
                         on_click=self.clear_new_task_section_fields),
-                    ft.ElevatedButton(all_vars.test_button_text_eng),
+                    ft.ElevatedButton(
+                        all_vars.test_button_text_eng,
+                        # on_click=self.open_dlg_modal
+                    ),
                 ]
             )
         ])
-        # функция которая должна создавать UI с двумя полями для ввода текста и двумя кнопками, сохранить задачу и
-        # очистить поля
+        # функция которая должна создавать UI с двумя полями для ввода текста и двумя кнопками (сохранить задачу и
+        # очистить поля)
 
     def clear_new_task_section_fields(self, e):
         self.new_task_name_field.value = ''
@@ -69,6 +73,11 @@ class TodoTaskPageUI(ft.UserControl):
         task_id_field = ft.Text(
             value=one_task['task_id'],
             visible=False
+        )
+        task_info_title_field = ft.Text(one_task['task_name'])
+        task_info_subtitle_field = ft.Text(
+            value=one_task['task_description'],
+            italic=True
         )
         task_id = task_id_field.value
         task_control_buttons = ft.Row(
@@ -87,14 +96,24 @@ class TodoTaskPageUI(ft.UserControl):
                 ft.Row(
                     spacing=0,
                     controls=[
-                        ft.IconButton(  # edit current task
-                            icons.EDIT,
-                            on_click=lambda e: self.edit_current_task(e,)
+                        # ft.IconButton(  # edit current task
+                        #     icons.EDIT,
+                        #     on_click=lambda e: self.edit_current_task(
+                        #         e,
+                        #         new_task_name=task_info_title_field.value,
+                        #         new_task_description=task_info_subtitle_field.value
+                        #     )
+                        # ),
+                        self.edit_current_task(
+                            new_task_name=task_info_title_field.value,
+                            new_task_description=task_info_subtitle_field.value,
+                            task_id=task_id,
+                            operation_type=all_vars.all_operation_types['update']
                         ),
-                        ft.IconButton(  # add a subtask
-                            icons.ADD,
-                            # on_click=lambda e: self.save_new_task(e, 'lll', 'imper', task_id)
-                        ),
+                        # ft.IconButton(  # add a subtask
+                        #     icons.ADD,
+                        #     # on_click=lambda e: self.save_new_task(e, 'lll', 'imper', task_id)
+                        # ),
                         ft.IconButton(icons.START),
                         ft.IconButton(icons.STAR),
                     ],
@@ -103,11 +122,8 @@ class TodoTaskPageUI(ft.UserControl):
         )
 
         task_info = ft.ListTile(
-            title=ft.Text(one_task['task_name']),
-            subtitle=ft.Text(
-                value=one_task['task_description'],
-                italic=True
-            )
+            title=task_info_title_field,
+            subtitle=task_info_subtitle_field
         )
         one_task_card = ft.Card(
             content=ft.Container(ft.Column(
@@ -158,15 +174,58 @@ class TodoTaskPageUI(ft.UserControl):
                             tab_content.controls.append(self.create_one_task_card_ui(created_task))
                             self.all_tabs.update()
                             break
+
             # update all existed keys
             self.all_existed_keys = tsk.get_all_existing_keys(self.all_tasks['all_tasks'], self.all_existed_keys)
             self.clear_new_task_section_fields(e)
 
-    def edit_current_task(self,e):
+    def edit_current_task(self,
+                          new_task_name,
+                          new_task_description,
+                          task_id=None,
+                          operation_type='') -> ft.IconButton:
         """open modal dialog with inputs filled with task's data and allow to modify and save the task"""
         print(f"status: the function is not implemented yet"
               f"purpose: open modal dialog with inputs filled with task's data and allow to modify and save the task")
-        pass
+        print(f"received new task name: {new_task_name}")
+        print(f"received new task description: {new_task_description}")
+        print(f"received parent id: {task_id}")
+        print(f"received operation type: {operation_type}")
+
+        def close_dlg(e):
+            dlg_modal.open = False
+            for tab in self.all_tabs.tabs:
+                if tab.text == 'all':
+                    tab_content = tab.content
+                    print(type(tab_content))
+                    
+            e.control.page.update()
+
+        dlg_modal = ft.AlertDialog(
+            modal=True,
+            title=ft.Text("edit task"),
+            content=ft.Column(
+                tight=True,
+                controls=[
+                    ft.Text(f"current task_id is: {task_id}"),
+                    ft.TextField(hint_text=new_task_name),
+                    ft.TextField(hint_text=new_task_description),
+                ]
+            ),
+            actions=[
+                ft.TextButton("Yes", on_click=close_dlg),
+                ft.TextButton("No", on_click=close_dlg),
+            ],
+            actions_alignment=ft.MainAxisAlignment.END,
+            on_dismiss=lambda e: print("Modal dialog dismissed!"),
+        )
+
+        def open_dlg_modal(e):
+            e.control.page.dialog = dlg_modal
+            dlg_modal.open = True
+            e.control.page.update()
+
+        return ft.IconButton(icons.ADD, on_click=open_dlg_modal)
 
     def load_tasks(self, tab_name):
         # функция заполнения одного Tab-а в Tabs, эта функция должна смотреть в self.all_tasks и для каждого task
@@ -181,13 +240,14 @@ class TodoTaskPageUI(ft.UserControl):
             content=tab_wrapper
         )
 
+
     def create_todo_task_page(self):
-        created_page = ft.Column(controls=[
+        self.created_page = ft.Column(controls=[
             self.create_new_task_section(),
             self.create_tabs_section(),
         ])
 
-        return created_page
+        return self.created_page
 
     def test_press_get_value(self, e, task_id):
         print('icon button was pressed')
