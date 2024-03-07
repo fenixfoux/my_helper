@@ -181,64 +181,54 @@ class TodoTaskPageUI(ft.UserControl):
                           new_task_name,
                           new_task_description,
                           task_id):
-        # operation_type='') -> ft.IconButton:
         """open modal dialog with inputs filled with task's data and allow to modify and save the task"""
-        # print(f"status: the function is not implemented yet"
-        #       f"purpose: open modal dialog with inputs filled with task's data and allow to modify and save the task")
-        # print(f"received new task name: {new_task_name}")
-        # print(f"received new task description: {new_task_description}")
-        # print(f"received parent id: {task_id}")
-        # print(f"received operation type: {operation_type}")
         dlg_task_id_field = ft.Text(task_id)
-        dlg_task_name_field = ft.TextField(hint_text=new_task_name)
-        dlg_task_description_field = ft.TextField(hint_text=new_task_description)
+        dlg_task_name_field = ft.TextField(value=new_task_name)
+        dlg_task_description_field = ft.TextField(value=new_task_description)
 
         def modify_task_window_btn_yes(ev, upd_task_name, upd_task_description):
-            dlg_modal.open = False
-            # create updated task
-            updated_task = tsk.prepare_new_task_dict(
-                task_id=task_id,
-                task_name=upd_task_name,
-                task_description=upd_task_description,
-            )
-            print(f"updated task: {updated_task}")
-            # save updated task
-            tsk.update_task(self.all_tasks, updated_task)
-            # load updated list of tasks
-            self.all_tasks = tsk.load_tasks()
-            # update the card with new data
-            for tab in self.all_tabs.tabs:
-                tab_content = tab.content
-                for one_card in tab_content.controls:
-                    # one_card.content.controls[0] is a ft.Text which value contain the task_id
-                    if one_card.content.controls[0].value == task_id:
-                        for field in one_card.content.controls:
-                            if field.key == 'task_info':
-                                print('kk')
-                                print(type(field))
-                                print(type(field.title.value))
-                                field.title.value = upd_task_name
-                                field.subtitle.value = upd_task_description
-                                # field.title = upd_task_name
-                                # field.subtitle = upd_task_description
-                        # print(type(tab_content.controls))
-                        # print(len(tab_content.controls))
-                        # tab_content.controls.remove(one_card)
-                        # print(len(tab_content.controls))
-                        # self.all_tabs.update()
-                        e.control.page.update()
+            if len(upd_task_name.strip()) != 0:
+                dlg_modal.open = False
+                # create updated task
+                updated_task = tsk.prepare_new_task_dict(
+                    task_id=task_id,
+                    task_name=upd_task_name,
+                    task_description=upd_task_description,
+                )
+                print(f"updated task: {updated_task}")
+                # save updated task
+                tsk.update_task(self.all_tasks, updated_task)
+                # load updated list of tasks
+                self.all_tasks = tsk.load_tasks()
+                # update the card with new data
+                for tab in self.all_tabs.tabs:
+                    tab_content = tab.content
+                    for one_card in tab_content.controls:
+                        # one_card.content.controls[0] is a ft.Text which value contain the task_id
+                        if one_card.content.controls[0].value == task_id:
+                            for field in one_card.content.controls:
+                                if field.key == 'task_info':
+                                    print('kk')
+                                    print(type(field))
+                                    print(type(field.title.value))
+                                    field.title.value = upd_task_name
+                                    field.subtitle.value = upd_task_description
+                            e.control.page.update()
 
-            # print(self.all_tasks)
-            ev.control.page.update()
+                # print(self.all_tasks)
+                ev.control.page.update()
+            else:
+                dlg_task_name_field.error_text = 'Input the fucking task name, maaaaan'
+                ev.control.page.update()
 
         def close_dlg(ev):
             dlg_modal.open = False
-            for tab in self.all_tabs.tabs:
-                if tab.text == 'all':
-                    tab_content = tab.content
-                    print(type(tab_content))
-                    if isinstance(tab_content, ft.Column):
-                        tab_content.controls.clear()
+            # for tab in self.all_tabs.tabs:
+            #     if tab.text == 'all':
+            #         tab_content = tab.content
+            #         print(type(tab_content))
+            #         if isinstance(tab_content, ft.Column):
+            #             tab_content.controls.clear()
 
             ev.control.page.update()
 
@@ -265,7 +255,7 @@ class TodoTaskPageUI(ft.UserControl):
                 ft.TextButton("No", on_click=close_dlg),
             ],
             actions_alignment=ft.MainAxisAlignment.END,
-            on_dismiss=lambda e: print("Modal dialog dismissed!"),
+            # on_dismiss=lambda e: print("Modal dialog dismissed!"),
         )
 
         def open_dlg_modal(ev):

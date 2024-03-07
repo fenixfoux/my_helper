@@ -2,20 +2,14 @@
     "all_tasks": [
         {
             "task_id": 629609,
-            "task_name": "bla v",
-            "task_description": "inwe weriw",
+            "task_name": "default task name",
+            "task_description": "default task description",
             "task_subtasks": []
         },
         {
             "task_id": 803157,
             "task_name": "clear",
             "task_description": "and fast",
-            "task_subtasks": []
-        },
-        {
-            "task_id": 640021,
-            "task_name": "ret",
-            "task_description": "ter",
             "task_subtasks": []
         },
         {
