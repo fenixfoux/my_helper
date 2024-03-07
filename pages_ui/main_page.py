@@ -1,7 +1,7 @@
-# main_page_content.py
 from flet import Container, Column, Text, TextButton
 
-def create_main_page_content(page):
+
+def main_page_content(page):
     return Container(
         content=Column(
             controls=[
@@ -12,3 +12,4 @@ def create_main_page_content(page):
             ]
         )
     )
+

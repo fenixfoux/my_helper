@@ -1,5 +1,10 @@
-storage_file_path = 'all_tasks.json'
-
+storage_file_path = 'storage/all_tasks.json'
+new_task_creation = {
+    "task_id": 655,
+    "task_name": "default name",
+    "task_description": "default desc",
+    "task_subtasks": []
+}
 default_list_of_tasks = {
     "all_tasks": [
         {
