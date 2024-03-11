@@ -18,8 +18,8 @@ def main(one_page: Page):
     pages = {
         '/': View(
             "/",
-            # [main_page_content],
-            [to_do_page_content],  # todo: remove after end, now is for starts with todo_page
+            [main_page_content],
+            # [to_do_page_content],  # todo: remove after end, now is for starts with todo_page
         ),
         '/todo_page': View(
             "todo_page",

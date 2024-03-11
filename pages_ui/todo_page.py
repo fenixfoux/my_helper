@@ -95,7 +95,7 @@ class TodoTaskPageUI(ft.UserControl):
                     spacing=0,
                     controls=[
                         ft.IconButton(  # edit current task
-                            icons.BED,
+                            icons.REBASE_EDIT,
                             on_click=lambda e: self.edit_current_task(
                                 e,
                                 new_task_name=task_info_title_field.value,
@@ -233,7 +233,6 @@ class TodoTaskPageUI(ft.UserControl):
             ev.control.page.update()
 
         # dialog window for editing task
-
         dlg_modal = ft.AlertDialog(
             modal=True,
             title=ft.Text("edit task"),
