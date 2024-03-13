@@ -84,7 +84,7 @@ class OneTaskPage(ft.UserControl):
               f"the current status")
 
     def task_operation_edit(self, e, task_id, task_name, task_description):
-        print(type(e.control.page.controls))
+        # print(type(e.control.page.controls))
         temp_dict = {
             "task_id": task_id,
             "task_name": task_name,
@@ -92,7 +92,8 @@ class OneTaskPage(ft.UserControl):
         }
         decision, modified_dict = aux_f.modify_task_alert_dialog(e, "Modify task", temp_dict)
         # self.find_field_by_key(e, 'task_name', e.control.page.controls)
-        print(decision, modified_dict)
+        print(decision)
+        print(modified_dict)
 
     def find_field_by_key(self, e, key: str, controls):
         for field in controls:

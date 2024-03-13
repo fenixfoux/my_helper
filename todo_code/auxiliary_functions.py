@@ -51,27 +51,42 @@ def modify_task_alert_dialog(e, confirmation_question: str, task_dict: dict):
     :return: bool, True if user pressed "Yes", False if pressed "No"
     """
     decision = None
-    modified_task = {}
+    modified_task = task_dict.copy()
     def callback(choice):
         nonlocal decision
         decision = choice
 
+    def ret_modified_dict(controls: list):
+        for field in controls:
+            print(field.value)
+            modified_task[field.key] = field.value
+        print(f"task after modify:{modified_task}")
+
     created_alert_dialog = ft.AlertDialog(
         modal=True,
-        title=ft.Text("confirmation_question"),
+        title=ft.Text(confirmation_question),
         content=ft.Column(
             tight=True,
             controls=[
-                ft.TextField(value=task_dict['task_name']),
-                ft.TextField(value=task_dict['task_description']),
+                # ft.TextField(key='task_id',value=task_dict['task_id'], visible=False),
+                ft.TextField(key='task_name',value=task_dict['task_name']),
+                ft.TextField(key='task_description',value=task_dict['task_description']),
             ]
         ),
         actions=[
-            ft.TextButton("Yes", on_click=lambda event: callback(True)),
+            ft.TextButton("Yes",
+                          on_click=lambda event: [
+                              callback(True),
+                              ret_modified_dict(
+                                  created_alert_dialog.content.controls
+                              )
+                          ]),
             ft.TextButton("No", on_click=lambda event: callback(False)),
         ],
         actions_alignment=ft.MainAxisAlignment.END,
     )
+
+
 
     e.control.page.dialog = created_alert_dialog
     created_alert_dialog.open = True
@@ -83,7 +98,6 @@ def modify_task_alert_dialog(e, confirmation_question: str, task_dict: dict):
     if decision is not None:
         created_alert_dialog.open = False
         e.control.page.update()
-
     return decision, modified_task
 
 

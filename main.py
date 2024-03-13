@@ -2,6 +2,9 @@ from flet import *
 
 from pages_ui.main_page import main_page_content as mpc
 from pages_ui.todo_page import TodoTaskPageUI
+from pages_ui.temp_one_task_page import OneTaskPage
+
+from storage.all_variables import new_task_creation
 
 
 # todo:
@@ -14,6 +17,7 @@ from pages_ui.todo_page import TodoTaskPageUI
 def main(one_page: Page):
     main_page_content = mpc(one_page)
     to_do_page_content = TodoTaskPageUI().create_todo_task_page()
+    temp_one_task_page = OneTaskPage(new_task_creation).create_one_task_page()
 
     pages = {
         '/': View(
@@ -24,6 +28,11 @@ def main(one_page: Page):
         '/todo_page': View(
             "todo_page",
             [to_do_page_content],
+            scroll=ScrollMode.AUTO
+        ),
+        '/temp_one_task_page': View(
+            "temp_one_task_page",
+            [temp_one_task_page],
             scroll=ScrollMode.AUTO
         ),
     }
