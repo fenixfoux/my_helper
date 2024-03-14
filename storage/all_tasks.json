@@ -1,33 +1,15 @@
 {
     "all_tasks": [
         {
-            "task_id": 629609,
-            "task_name": "default task name",
-            "task_description": "default task description",
-            "task_subtasks": []
-        },
-        {
             "task_id": 803157,
             "task_name": "clear",
             "task_description": "and fast",
             "task_subtasks": []
         },
         {
-            "task_id": 924116,
-            "task_name": "recreated task",
-            "task_description": "description of recreated task",
-            "task_subtasks": []
-        },
-        {
-            "task_id": 243148,
-            "task_name": "erty",
-            "task_description": "retyerty",
-            "task_subtasks": []
-        },
-        {
-            "task_id": 782546,
-            "task_name": "finaly i did something",
-            "task_description": "sure ?",
+            "task_id": 384252,
+            "task_name": "wertewrt",
+            "task_description": "ewrtwerter",
             "task_subtasks": []
         }
     ]

@@ -15,20 +15,37 @@ class OneTaskPage(ft.UserControl):
     def header_section(self):
         header_section = ft.Row(tight=True)
         header_content_part = ft.Column(expand=9, key='header_content_part')
-        header_buttons_part = ft.Column(expand=1)
+        header_buttons_part = ft.Column(
+            expand=1,
+            horizontal_alignment=CrossAxisAlignment.END,
+            controls=[
+                ft.IconButton(
+                    icons.REBASE_EDIT,
+                    on_click=lambda event: self.create_modify_task_alert_dialog(event, header_content_part)
+                ),
+                ft.IconButton(
+                    icons.DONE,
+                    on_click=lambda event: self.create_modify_task_alert_dialog(event, header_content_part)
+                ),
+
+            ]
+        )
         for key in self.received_task:
             visible = True
             if key != 'task_subtasks':
                 if key == 'task_id':
                     visible = False
                 header_content_part.controls.append(ft.Text(key=key, value=self.received_task[key], visible=visible))
-
-        header_buttons_part.controls.append(
-            ft.ElevatedButton('test',
-                              on_click=lambda event: self.create_modify_task_alert_dialog(event, header_content_part)))
         header_section.controls = [header_content_part, header_buttons_part]
         return header_section
 
+    def body_section(self):
+        created_body_section = ft.Column()
+        body_buttons_part = ft.Row()
+
+
+
+        return created_body_section
     def create_modify_task_alert_dialog(self, e, content: ft.Column):
         print(content.key)
         temp_dict = {}
@@ -83,6 +100,7 @@ class OneTaskPage(ft.UserControl):
         :param dict_to_ui: dictionary with modified values
         :return:
         """
+
         def find_field_by_key(e, key: str, controls):
             for field in controls:
                 if field.key == key:
@@ -90,6 +108,8 @@ class OneTaskPage(ft.UserControl):
                     # if section found then update fields in that section by keys in received modified dictionary:
                     for one_field, one_value in zip(field.controls, dict_to_ui):
                         if one_field.key == one_value:
+                            # todo: here will be another 'if' for checking 'field' if field is a text then change value,
+                            #       if field was date-picker then will need to add another functionality
                             one_field.value = dict_to_ui[one_value]
                     e.control.page.update()
                     break
@@ -102,19 +122,19 @@ class OneTaskPage(ft.UserControl):
         find_field_by_key(event, section_key, event.control.page.controls)
 
     def create_one_task_page(self):
-        return ft.Column(
+        created_column_page = ft.Column(
             controls=[
                 self.header_section()
-            ]
-        )
+            ])
+        return created_column_page
 
 
-# ===== TESTING ===== #
-def main(page: Page):
-    # check_storage_file()
-    todo_tp = OneTaskPage(new_task_creation)
-    page.add(todo_tp.create_one_task_page())
-
-
+# # ===== TESTING ===== #
+# def main(page: Page):
+#     # check_storage_file()
+#     todo_tp = OneTaskPage(new_task_creation)
+#     page.add(todo_tp.create_one_task_page())
 #
-ft.app(target=main)
+#
+# #
+# ft.app(target=main)
