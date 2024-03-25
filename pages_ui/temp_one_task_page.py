@@ -9,6 +9,7 @@ from storage.all_variables import new_task_creation
 class OneTaskPage(ft.UserControl):
     def __init__(self, received_task):
         super().__init__()
+        self.created_column_page = None
         self.received_task = received_task
         self.confirm_alert_dialog = None
 
@@ -40,12 +41,15 @@ class OneTaskPage(ft.UserControl):
         return header_section
 
     def body_section(self):
-        created_body_section = ft.Column()
+        created_body_section = ft.Column(
+            controls=[
+                TextButton('go to page 2', on_click=lambda _: page.go('/page_2')),
+            ]
+        )
         body_buttons_part = ft.Row()
 
-
-
         return created_body_section
+
     def create_modify_task_alert_dialog(self, e, content: ft.Column):
         print(content.key)
         temp_dict = {}
@@ -83,11 +87,13 @@ class OneTaskPage(ft.UserControl):
 
             created_alert_dialog.open = False
             ev.control.page.update()
+            # self.created_column_page.update()
 
         def open_dlg_modal(ev):
             ev.control.page.dialog = created_alert_dialog
             created_alert_dialog.open = True
             ev.control.page.update()
+            # self.created_column_page.update()
 
         open_dlg_modal(e)
 
@@ -111,7 +117,6 @@ class OneTaskPage(ft.UserControl):
                             # todo: here will be another 'if' for checking 'field' if field is a text then change value,
                             #       if field was date-picker then will need to add another functionality
                             one_field.value = dict_to_ui[one_value]
-                    e.control.page.update()
                     break
                 try:
                     if field.controls:
@@ -119,17 +124,16 @@ class OneTaskPage(ft.UserControl):
                 except AttributeError:
                     pass
 
-        find_field_by_key(event, section_key, event.control.page.controls)
+        find_field_by_key(event, section_key, self.created_column_page.controls)
 
     def create_one_task_page(self):
-        created_column_page = ft.Column(
+        self.created_column_page = ft.Column(
             controls=[
                 self.header_section()
             ])
-        return created_column_page
+        return self.created_column_page
 
-
-# # ===== TESTING ===== #
+# ===== TESTING ===== #
 # def main(page: Page):
 #     # check_storage_file()
 #     todo_tp = OneTaskPage(new_task_creation)

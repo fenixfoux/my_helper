@@ -13,13 +13,15 @@ from storage.all_variables import new_task_creation
 #  -
 #  -
 
-
-def main(one_page: Page):
+def pages(one_page, route):
     main_page_content = mpc(one_page)
     to_do_page_content = TodoTaskPageUI().create_todo_task_page()
     temp_one_task_page = OneTaskPage(new_task_creation).create_one_task_page()
-
-    pages = {
+    print(route)
+    print(type(route))
+    if route == '/todo_page':
+        print('yahoo')
+    return {
         '/': View(
             "/",
             [main_page_content],
@@ -35,17 +37,20 @@ def main(one_page: Page):
             [temp_one_task_page],
             scroll=ScrollMode.AUTO
         ),
-    }
+    }[route]
 
-    def route_change(route):
-        one_page.views.clear()
-        one_page.views.append(
-            pages[one_page.route]
-        )
 
-    one_page.add(main_page_content)
+def route_change(one_page, route):
+    one_page.views.clear()
+    one_page.views.append(
+        pages(one_page, one_page.route)
+    )
+    one_page.update()
 
-    one_page.on_route_change = route_change
+
+def main(one_page: Page):
+    one_page.on_route_change = lambda _: route_change(one_page, one_page.route)
+
     one_page.go(one_page.route)
 
 

@@ -20,6 +20,17 @@ class TodoTaskPageUI(ft.UserControl):
         self.new_task_name_field = None
         self.new_task_description_field = None
         self.all_tabs = None
+    def go_home(self, ev):
+        # # print(ev.page.route)
+        # ev.page.route = '/'
+        # # print(ev.page.route)
+        # # ev.page.clean()
+        # ev.page.update()
+        ev.page.controls.clear()
+        ev.page.update()
+        ev.page.route = '/'
+        ev.page.clean()
+        ev.page.update()
 
     def create_new_task_section(self) -> ft.Column:
         self.new_task_name_field = TextField(hint_text=all_vars.new_task_name_hint_eng)
@@ -29,7 +40,11 @@ class TodoTaskPageUI(ft.UserControl):
                 alignment=MainAxisAlignment.SPACE_BETWEEN,
                 controls=[
                     ft.Text(self.page_name),
-                    ft.ElevatedButton(all_vars.button_back_text_eng)
+                    ft.ElevatedButton(
+                        all_vars.button_back_text_eng,
+                        # on_click=lambda ev: print(ev.page)
+                        on_click=lambda ev: self.go_home(ev)
+                    )
                 ]),
             self.new_task_name_field,
             self.new_task_description_field,
