@@ -1,57 +1,14 @@
-from flet import *
+import flet as ft
 
-from pages_ui.main_page import main_page_content as mpc
-from pages_ui.todo_page import TodoTaskPageUI
-from pages_ui.temp_one_task_page import OneTaskPage
-
-from storage.all_variables import new_task_creation
+from router import page_route_change_handler
+from db_functionality import todo_db_funcs as db_td
 
 
-# todo:
-#  - if task name is empty alert dialog about that and don't create/update task
-#  - before deleting task alert dialog with question yes/no
-#  -
-#  -
+def main(one_page: ft.Page):
+    db_td.check_for_db()
 
-def pages(one_page, route):
-    main_page_content = mpc(one_page)
-    to_do_page_content = TodoTaskPageUI().create_todo_task_page()
-    temp_one_task_page = OneTaskPage(new_task_creation).create_one_task_page()
-    print(route)
-    print(type(route))
-    if route == '/todo_page':
-        print('yahoo')
-    return {
-        '/': View(
-            "/",
-            [main_page_content],
-            # [to_do_page_content],  # todo: remove after end, now is for starts with todo_page
-        ),
-        '/todo_page': View(
-            "todo_page",
-            [to_do_page_content],
-            scroll=ScrollMode.AUTO
-        ),
-        '/temp_one_task_page': View(
-            "temp_one_task_page",
-            [temp_one_task_page],
-            scroll=ScrollMode.AUTO
-        ),
-    }[route]
-
-
-def route_change(one_page, route):
-    one_page.views.clear()
-    one_page.views.append(
-        pages(one_page, one_page.route)
-    )
+    one_page.on_route_change = lambda _: page_route_change_handler(one_page)
+    one_page.go(one_page.route)
     one_page.update()
 
-
-def main(one_page: Page):
-    one_page.on_route_change = lambda _: route_change(one_page, one_page.route)
-
-    one_page.go(one_page.route)
-
-
-app(target=main)
+ft.app(target=main)

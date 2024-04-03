@@ -1,14 +1,22 @@
-import flet as ft
-
-from router import page_route_change_handler
-
-
-
-def main(one_page: ft.Page):
-
-    one_page.on_route_change = lambda _: page_route_change_handler(one_page)
-    one_page.go(one_page.route)
-    one_page.update()
-
-
-ft.app(target=main)
+tab_names = {
+    'eng': {
+        'all': "all",
+        '0': 'active',
+        '1': 'completed'
+    },
+    'rus': {
+        'all': "все",
+        '0': 'в процессе',
+        '1': 'готово'
+    }
+}
+selected_lang = 'eng'
+gg = "active"
+print(tab_names[selected_lang])
+for elem in tab_names[selected_lang]:
+    # print(f"elem is '{elem}'") # get keys
+    # print(tab_names[selected_lang][elem])
+    if tab_names[selected_lang][elem] == gg:
+        print(f"tab_names[selected_lang][elem] == gg is {tab_names[selected_lang][elem] == gg}")
+        # print(tab_names[selected_lang][elem])
+        print(elem)
