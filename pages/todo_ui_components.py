@@ -6,6 +6,7 @@ from pages.home_page import change_route
 from pages.one_task import OneTask
 import storages.all_variables as all_vars
 from db_functionality import todo_db_funcs as db_td
+from testing import example
 
 
 class TodoComponents(ft.UserControl):
@@ -29,10 +30,9 @@ class TodoComponents(ft.UserControl):
             value=str(received_task_object.task_id),
             visible=False
         )
-        task_info_title_field = ft.Text(received_task_object.task_name, key='task_name')
+        task_info_title_field = ft.Text(received_task_object.task_name)
         task_info_subtitle_field = ft.Text(
             value=received_task_object.task_description,
-            key='task_description',
             italic=True
         )
         task_id = task_id_field.value
@@ -42,13 +42,20 @@ class TodoComponents(ft.UserControl):
                 ft.Row(
                     spacing=0,
                     controls=[
-                        ft.IconButton(ft.icons.PLAYLIST_ADD_CHECK_CIRCLE_OUTLINED),
+                        ft.IconButton(
+                            ft.icons.PLAYLIST_ADD_CHECK_CIRCLE_OUTLINED,
+                            on_click=lambda e: self.task_done(e, task_id),
+                            tooltip="Finish him!"
+                        ),
                         ft.IconButton(
                             ft.icons.HIGHLIGHT_REMOVE,
                             on_click=lambda e: self.delete_selected_task(e, task_id),
-                            data=task_id),
+                            data=task_id,
+                            tooltip="delete this task"
+                        ),
                     ],
                 ),
+                example(),
                 ft.Row(
                     spacing=0,
                     controls=[
@@ -59,25 +66,39 @@ class TodoComponents(ft.UserControl):
                             #     new_task_name=task_info_title_field.value,
                             #     new_task_description=task_info_subtitle_field.value,
                             #     task_id=task_id
-                            # )
+                            # ),
+                            tooltip="edit this task"
                         ),
 
                         # ft.IconButton(  # add a subtask
                         #     icons.ADD,
                         #     # on_click=lambda e: self.save_new_task(e, 'lll', 'imper', task_id)
                         # ),
-                        ft.IconButton(ft.icons.START),
+                        ft.IconButton(
+                            ft.icons.START,
+                            tooltip="go to this task's page"
+                        ),
                         ft.IconButton(ft.icons.STAR),
                     ],
                 )
             ]
         )
+        task_date = ft.Row(
+            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+            controls=[
+                ft.Row(controls=[ft.Text(f"Created: {received_task_object.task_created_date}")]),
+                ft.Row(controls=[ft.Text(f"Deadline: {received_task_object.task_due_date}")]),
+            ]
+        )
 
         task_info = ft.ListTile(
-            title=task_info_title_field,
-            subtitle=task_info_subtitle_field,
-            key='task_info',
+            title=ft.Column(controls=[
+                task_info_title_field,
+                task_info_subtitle_field
+            ]),
+            subtitle=task_date
         )
+
         one_task_card = ft.Card(
             content=ft.Column(
                 spacing=0,
@@ -86,10 +107,41 @@ class TodoComponents(ft.UserControl):
                 controls=[
                     task_id_field,
                     task_control_buttons,
-                    task_info
+                    # task_status,
+                    task_info,
                 ],
             ))
         return one_task_card
+
+    # def find_by_key(self, rec_elem, rec_key):
+    #     """
+    #     take current page view by using event (e.page.views[-1]) and search ft.Text field with received key 'rec_key',
+    #     if element is found then his parent should be assigned to the TodoComponents attribute
+    #     self.link_to_searched_element, after that the function which called that function can operate with
+    #     searched element
+    #     :param rec_elem: received element (e.page.views[-1])
+    #     :param rec_key: received key (ft.control with that key should be found)
+    #     :return:
+    #     """
+    #     if rec_elem.controls:
+    #         # print(rec_elem.controls)
+    #         for one_element in rec_elem.controls:
+    #             # print(f"the key of current element is: '{one_element.key}'")
+    #             if hasattr(one_element, 'key'):
+    #                 if one_element.key == rec_key:
+    #                     print(f"the element with searched key '{rec_key}' found.\n"
+    #                           f"type of searched element is '{rec_elem}'\n"
+    #                           f"element: {rec_elem}")
+    #                     self.link_to_searched_element = rec_elem
+    #
+    #                 if hasattr(one_element, 'controls'):
+    #                     # print(f"element {one_element} has controls")
+    #                     self.find_by_key(one_element, rec_key)
+    #                 else:
+    #                     pass
+    #                 # print(f"element {one_element} don't have controls")
+    #     else:
+    #         pass
 
     def find_by_key(self, rec_elem, rec_key):
         """
@@ -107,38 +159,38 @@ class TodoComponents(ft.UserControl):
                 # print(f"the key of current element is: '{one_element.key}'")
                 if hasattr(one_element, 'key'):
                     if one_element.key == rec_key:
-                        print(f"the element with searched key '{rec_key}' found.\n"
-                              f"type of searched element is '{rec_elem}'\n"
-                              f"element: {rec_elem}")
+                        # print(f"the element with searched key '{rec_key}' found.\n"
+                        #       f"type of searched element is '{rec_elem}'\n"
+                        #       f"element: {rec_elem}")
                         self.link_to_searched_element = rec_elem
-
+                        break
                     if hasattr(one_element, 'controls'):
                         # print(f"element {one_element} has controls")
                         self.find_by_key(one_element, rec_key)
                     else:
                         pass
                     # print(f"element {one_element} don't have controls")
-
         else:
             pass
 
+    def task_done(self, e, task_id):
+        print(task_id)
+
     def delete_selected_task(self, e, task_id):
-        current_page = e.page.views[-1]
-        # find the block with list of cards and assign the result to self.list_of_cards
-        self.find_by_key(current_page, all_vars.key_list_of_cards)
-        # search in block list of cards and delete the card by id
-        print('=' * 50)
-        for item in self.link_to_searched_element.controls:
-            # print(item)
-            # print(isinstance(item, ft.Card))
-            if isinstance(item, ft.Card):
-                for field in item.content.controls:  # find field with key 'task_id'
-                    print(field.key)
-                    if field.key is not None:
-                        if field.key == all_vars.key_task_id:
-                            if field.value == task_id:
-                                self.link_to_searched_element.controls.remove(item)
-                                e.control.page.update()
+        # print('=' * 50)
+        elem_found = False
+        for tab_content in self.all_tabs.tabs:
+            for item in tab_content.content.controls:
+                if isinstance(item, ft.Card):
+                    for card_elem in item.content.controls:
+                        if hasattr(card_elem, 'key'):
+                            if card_elem.key == all_vars.key_task_id:
+                                if card_elem.value == task_id:
+                                    tab_content.content.controls.remove(item)
+                                    self.all_tabs.update()
+                                    elem_found = True
+        if elem_found:
+            db_td.remove_task_by_id(task_id)
 
     def create_new_task_section(self):
         new_task_name_field = ft.TextField(
@@ -198,6 +250,7 @@ class TodoComponents(ft.UserControl):
                                 e,
                                 t_name=new_task_name_field.value,
                                 t_description=new_task_description_field.value,
+                                task_created_date=datetime.date.today(),
                                 task_due_date=due_date_field.value
                             )
 
@@ -233,7 +286,7 @@ class TodoComponents(ft.UserControl):
         self.modal_alert_dialog(e, 'krya')
 
         # find the new task creation section control by key
-        self.find_by_key(current_page, all_vars.key_section_new_task_creation)
+        # self.find_by_key(current_page, all_vars.key_section_new_task_creation)
 
         print(self.link_to_searched_element)
         print(self.link_to_searched_element.controls)
@@ -246,8 +299,9 @@ class TodoComponents(ft.UserControl):
         :return: control ft.Column with list of controls (ft.Card)
         """
         list_of_cards = ft.Column()
+        list_of_cards.scroll = ft.ScrollMode.AUTO
         for one_task in self.all_tasks:
-            if status is None:
+            if status == all_vars.all_tab_names[self.selected_language][status]:
                 one_card = self.one_task_card(received_task_object=one_task)
                 list_of_cards.controls.append(one_card)
             elif one_task.task_status == status:
@@ -259,49 +313,53 @@ class TodoComponents(ft.UserControl):
     def create_tabs_section(self):
         # функция которая должна создать UI в форме табов, количество вкладок соответствует элементам списка
         # self.tab_pages
-        all_tabs = ft.Tabs(height=400, )
+        all_tabs = ft.Tabs(height=400)
         for one_tab_name in self.list_tab_names:
             all_tabs.tabs.append(
                 ft.Tab(
                     text=self.list_tab_names[one_tab_name],
-                    content=ft.Text('')
+                    content=ft.Column()
                 )
             )
         return all_tabs
 
     def update_tabs_content(self):
-        print(self.all_tabs.tabs)
+        # print(self.all_tabs.tabs)
         counter = 0
+        created_list_cards = []
         for tab in self.all_tabs.tabs:
             counter += 1
-            # print(tab.text)
-            if tab.text == "all":
-                created_list_cards = self.create_list_of_task_cards()
-            else:
-                created_list_cards = self.create_list_of_task_cards(status=tab.text)
+            for elem in all_vars.all_tab_names[self.selected_language]:
+                if all_vars.all_tab_names[self.selected_language][elem] == tab.text:
+                    created_list_cards = self.create_list_of_task_cards(status=elem)
             tab.content = created_list_cards
+            # print(tab.content.controls)
+            # print(type(tab.content))
 
-    def save_new_task(self, e, t_name, t_description, task_due_date):
+    def save_new_task(self, e, t_name, t_description, task_created_date, task_due_date):
         new_task = OneTask()
         new_task.task_name = t_name.strip()
         new_task.task_description = t_description
+        new_task.task_created_date = task_created_date
 
         if isinstance(task_due_date, str):
             datetime_obj = datetime.datetime.strptime(task_due_date, "%Y-%m-%d")
             new_task.task_due_date = datetime_obj.date()
         # todo: check if selected due date isn't expired
         new_task.task_due_date = task_due_date
-        # print(new_task.task_name)
-        # print(new_task.task_description)
-        # print(f"new_task.task_due_date: {new_task.task_due_date}")
-        # print(f"type(new_task.task_due_date): {type(new_task.task_due_date)}")
-        # print(new_task.task_due_date >= datetime.date.today())
 
         # check for empty task name
         if new_task.task_name:
-            # todo: save in data base
             # todo: add to the list of existing widgets
             print('+++++')
+            db_td.save_new_task(new_task)
+            # update list of all tasks from database
+            self.all_tasks = db_td.get_all_tasks()
+            # print(f"type: {type(self.all_tasks[-1].task_status)}")
+            self.update_tabs_content()
+            self.content_page.update()
+            # get the added task, which actually is the latest in the table
+            # added_task = db_td.get_all_tasks()[-1]
         else:
             self.modal_alert_dialog(e, all_vars.alert_empty_task_name_eng)
 

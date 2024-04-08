@@ -13,6 +13,7 @@ key_section_new_task_creation = 'new_task_creation'
 key_new_task_name = 'new_task_name'
 key_new_task_description = 'new_task_description'
 key_tabs_section = 'tabs_section'
+key_list_of_card = 'list_of_cards'
 
 new_task_name_hint_eng = 'task name'
 new_task_description_hint_eng = 'task description'

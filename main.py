@@ -12,3 +12,4 @@ def main(one_page: ft.Page):
     one_page.update()
 
 ft.app(target=main)
+
