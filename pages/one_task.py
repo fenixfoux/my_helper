@@ -17,10 +17,10 @@ class OneTask:
         self.parent_task_id = None
         self.task_name = ''
         self.task_description = ''
-        self.task_status = 0
+        self.task_status = 0  # 0 - active, 1 - completed
         self.task_created_date = ''
         self.task_due_date = ''
-        self.task_is_favorite = False
+        self.task_is_favorite = 0  # 0 - not favorite,  1 - favorite
         self.task_subtasks_id = []  # list of subtasks id
 
 

@@ -36,6 +36,12 @@ class TodoComponents(ft.UserControl):
             italic=True
         )
         task_id = task_id_field.value
+
+        if int(received_task_object.task_is_favorite) == 1:
+            is_favorite_icon_color = ft.colors.ORANGE_500
+        else:
+            is_favorite_icon_color = None
+
         task_control_buttons = ft.Row(
             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
             controls=[
@@ -45,7 +51,7 @@ class TodoComponents(ft.UserControl):
                         ft.IconButton(
                             ft.icons.PLAYLIST_ADD_CHECK_CIRCLE_OUTLINED,
                             on_click=lambda e: self.task_done(e, task_id),
-                            tooltip="Finish him!"
+                            tooltip="change task status"
                         ),
                         ft.IconButton(
                             ft.icons.HIGHLIGHT_REMOVE,
@@ -55,7 +61,7 @@ class TodoComponents(ft.UserControl):
                         ),
                     ],
                 ),
-                example(),
+                # example(),
                 ft.Row(
                     spacing=0,
                     controls=[
@@ -78,7 +84,12 @@ class TodoComponents(ft.UserControl):
                             ft.icons.START,
                             tooltip="go to this task's page"
                         ),
-                        ft.IconButton(ft.icons.STAR),
+                        ft.IconButton(
+                            ft.icons.STAR,
+                            tooltip="favorite?",
+                            icon_color=is_favorite_icon_color,
+                            on_click=lambda e: self.task_favorite(e, task_id),
+                        ),
                     ],
                 )
             ]
@@ -90,9 +101,18 @@ class TodoComponents(ft.UserControl):
                 ft.Row(controls=[ft.Text(f"Deadline: {received_task_object.task_due_date}")]),
             ]
         )
-
+        task_status = ft.Row(
+            alignment=ft.MainAxisAlignment.END,
+            controls=[
+                ft.Text(
+                    f"{all_vars.all_tab_names[self.selected_language][str(received_task_object.task_status)]}",
+                    color=ft.colors.GREEN,
+                    tooltip="task status")
+            ]
+        )
         task_info = ft.ListTile(
             title=ft.Column(controls=[
+                task_status,
                 task_info_title_field,
                 task_info_subtitle_field
             ]),
@@ -174,23 +194,62 @@ class TodoComponents(ft.UserControl):
             pass
 
     def task_done(self, e, task_id):
-        print(task_id)
+        for task in self.all_tasks:
+            if task.task_id == int(task_id):
+                current_task = task
+
+        if int(current_task.task_status) == 0:
+            next_status = 1
+        else:
+            next_status = 0
+
+        def callback_function(result):
+            if result:
+                if int(current_task.task_status) == 0:
+                    current_task.task_status = 1
+                else:
+                    current_task.task_status = 0
+                db_td.update_task(current_task)
+                self.all_tasks = db_td.get_all_tasks()
+                self.update_tabs_content()
+                self.content_page.update()
+
+        self.modal_confirm_dialog(
+            e,
+            f"change status to {all_vars.all_tab_names[self.selected_language][str(next_status)]}",
+            callback_function)
+
+    def task_favorite(self, e, task_id):
+        for task in self.all_tasks:
+            if task.task_id == int(task_id):
+                current_task = task
+                if int(current_task.task_is_favorite) == 0:
+                    current_task.task_is_favorite = 1
+                else:
+                    current_task.task_is_favorite = 0
+                db_td.update_task(current_task)
+                self.update_tabs_content()
+                self.content_page.update()
 
     def delete_selected_task(self, e, task_id):
-        # print('=' * 50)
-        elem_found = False
-        for tab_content in self.all_tabs.tabs:
-            for item in tab_content.content.controls:
-                if isinstance(item, ft.Card):
-                    for card_elem in item.content.controls:
-                        if hasattr(card_elem, 'key'):
-                            if card_elem.key == all_vars.key_task_id:
-                                if card_elem.value == task_id:
-                                    tab_content.content.controls.remove(item)
-                                    self.all_tabs.update()
-                                    elem_found = True
-        if elem_found:
-            db_td.remove_task_by_id(task_id)
+        def callback_function(result):
+            if result:
+                elem_found = False
+                for tab_content in self.all_tabs.tabs:
+                    for item in tab_content.content.controls:
+                        if isinstance(item, ft.Card):
+                            for card_elem in item.content.controls:
+                                if hasattr(card_elem, 'key'):
+                                    if card_elem.key == all_vars.key_task_id:
+                                        if card_elem.value == task_id:
+                                            tab_content.content.controls.remove(item)
+                                            self.all_tabs.update()
+                                            elem_found = True
+                if elem_found:
+                    db_td.remove_task_by_id(task_id)
+                    self.all_tasks = db_td.get_all_tasks()
+
+        self.modal_confirm_dialog(e, 'delete task', callback_function)
 
     def create_new_task_section(self):
         new_task_name_field = ft.TextField(
@@ -203,7 +262,8 @@ class TodoComponents(ft.UserControl):
             hint_text=all_vars.new_task_description_hint_eng,
             # key=all_vars.key_new_task_description
         )
-        due_date_field = ft.Text(str(datetime.date.today()))
+        due_date_field = ft.Text(str(datetime.date.today()),
+                                 key=all_vars.key_due_date_field)
         date_picker = ft.DatePicker(
             on_change=lambda e: self.change_date(e, due_date_field),
             # on_dismiss=date_picker_dismissed,
@@ -216,7 +276,7 @@ class TodoComponents(ft.UserControl):
         )
         due_date_section = ft.Row(
             controls=[
-                ft.Text(all_vars.due_date_text_eng),
+                ft.Text(all_vars.all_field_texts[self.selected_language]['due_date_text']),
                 due_date_field,
                 date_button
             ]
@@ -257,7 +317,7 @@ class TodoComponents(ft.UserControl):
                         ),
                         ft.ElevatedButton(
                             text=all_vars.clear_fields_new_task_button_text_eng,
-                            # on_click=self.clear_new_task_section_fields
+                            on_click=lambda e: self.clear_new_task_section_fields(e, self.new_task_creation_section)
                         ),
                         ft.ElevatedButton(
                             all_vars.test_button_text_eng,
@@ -266,6 +326,18 @@ class TodoComponents(ft.UserControl):
                     ]
                 )
             ])
+
+    def clear_new_task_section_fields(self, ev, section_controls):
+        for field in section_controls.controls:
+            if isinstance(field, ft.TextField):
+                field.value = ''
+            if isinstance(field, ft.Column) or isinstance(field, ft.Row):
+                self.clear_new_task_section_fields(ev, field)
+            if isinstance(field, ft.Text) and hasattr(field, 'key'):
+                if field.key == all_vars.key_due_date_field:
+                    field.value = str(datetime.date.today())
+
+        ev.control.page.update()
 
     def change_date(self, e, t_due_date_field):
         t_due_date_field.value = e.control.value.date()
@@ -279,17 +351,28 @@ class TodoComponents(ft.UserControl):
         dlg.open = True
         ev.control.page.update()
 
+    def modal_confirm_dialog(self, ev, alert_text, callback):
+        dlg = ft.AlertDialog(
+            modal=True,
+            title=ft.Text(f"Confirm the operation"),
+            content=ft.Text(f"Do you really want to {alert_text} ?"),
+            actions=[
+                ft.TextButton("Yes", on_click=lambda e: close_dlg(e, True)),
+                ft.TextButton("No", on_click=lambda e: close_dlg(e, False)),
+            ],
+            actions_alignment=ft.MainAxisAlignment.END,
+        )
+        ev.control.page.dialog = dlg
+        dlg.open = True
+        ev.control.page.update()
+
+        def close_dlg(e, confirmed: bool):
+            dlg.open = False
+            e.control.page.update()
+            callback(confirmed)
+
     def test_func(self, e):
-        print('test button pressed')
-        current_page = e.page.views[-1]
-
-        self.modal_alert_dialog(e, 'krya')
-
-        # find the new task creation section control by key
-        # self.find_by_key(current_page, all_vars.key_section_new_task_creation)
-
-        print(self.link_to_searched_element)
-        print(self.link_to_searched_element.controls)
+        print(f"test button was pressed")
 
     def create_list_of_task_cards(self, status: str = None) -> ft.Column:
         """
@@ -301,13 +384,25 @@ class TodoComponents(ft.UserControl):
         list_of_cards = ft.Column()
         list_of_cards.scroll = ft.ScrollMode.AUTO
         for one_task in self.all_tasks:
+            # print(f"one_task.task_is_favorite: {one_task.task_is_favorite} type: {type(one_task.task_is_favorite)}")
+            # print()
+            # that case is for fill the tab which contain all tasks
             if status == all_vars.all_tab_names[self.selected_language][status]:
                 one_card = self.one_task_card(received_task_object=one_task)
                 list_of_cards.controls.append(one_card)
+            # that case is for fill the tab which contain only tasks with passed status
             elif one_task.task_status == status:
                 one_card = self.one_task_card(received_task_object=one_task)
                 list_of_cards.controls.append(one_card)
-        list_of_cards.controls.append(ft.Text(key=all_vars.key_list_of_cards, visible=False))
+            # that case is for fill the tab which contain only favorite tasks
+            # elif one_task.task_is_favorite == "1" and status == 'favorite':
+            #     one_card = self.one_task_card(received_task_object=one_task)
+            #     list_of_cards.controls.append(one_card)
+
+            print(one_task.task_is_favorite == "1")
+
+            # elif status == all_vars.all_tab_names[self.selected_language][status] and is_favorite is not None:
+            #     list_of_cards.controls.append(ft.Text('ololosh'))
         return list_of_cards
 
     def create_tabs_section(self):
@@ -324,42 +419,54 @@ class TodoComponents(ft.UserControl):
         return all_tabs
 
     def update_tabs_content(self):
-        # print(self.all_tabs.tabs)
-        counter = 0
+        """
+        update content for every tab in all tabs, after call this function is required to use self.content_page.update()
+        because that function update only the content of tabs not the Ui
+        :return: None
+        """
+        # todo: actually update statement get list of all tasks, create list of cards with them and replace old tasks
+        #  with the new tasks, that way is ok but it create uncomfortable view of refresh, and need to scroll again
+        #  for find changed task. would be fine to find a way to change the element directly.
         created_list_cards = []
         for tab in self.all_tabs.tabs:
-            counter += 1
             for elem in all_vars.all_tab_names[self.selected_language]:
                 if all_vars.all_tab_names[self.selected_language][elem] == tab.text:
                     created_list_cards = self.create_list_of_task_cards(status=elem)
             tab.content = created_list_cards
-            # print(tab.content.controls)
-            # print(type(tab.content))
 
-    def save_new_task(self, e, t_name, t_description, task_created_date, task_due_date):
+    def save_new_task(self, e, t_name, t_description, task_created_date, task_due_date, parent_task_id=None):
+        """
+        take data for creation one new task object, save it into database, append him to the page if is not a child task
+        :param e: event handler
+        :param t_name: str: text from field task name
+        :param t_description: str: text from field task description
+        :param task_created_date: str/date: system date creation date
+        :param task_due_date: str/date: selected value in calendar
+        :param parent_task_id: str: id of parent task, if new task then value is None
+        :return: None
+        """
         new_task = OneTask()
         new_task.task_name = t_name.strip()
         new_task.task_description = t_description
         new_task.task_created_date = task_created_date
+        new_task.parent_task_id = parent_task_id
 
         if isinstance(task_due_date, str):
             datetime_obj = datetime.datetime.strptime(task_due_date, "%Y-%m-%d")
             new_task.task_due_date = datetime_obj.date()
-        # todo: check if selected due date isn't expired
+        # todo: check if selected due date isn't expired, and if set expired date ask confirmation for set the status
+        #  as 'completed' or 'active'
         new_task.task_due_date = task_due_date
 
         # check for empty task name
         if new_task.task_name:
-            # todo: add to the list of existing widgets
-            print('+++++')
             db_td.save_new_task(new_task)
             # update list of all tasks from database
             self.all_tasks = db_td.get_all_tasks()
             # print(f"type: {type(self.all_tasks[-1].task_status)}")
+            self.clear_new_task_section_fields(e, self.new_task_creation_section)
             self.update_tabs_content()
             self.content_page.update()
-            # get the added task, which actually is the latest in the table
-            # added_task = db_td.get_all_tasks()[-1]
         else:
             self.modal_alert_dialog(e, all_vars.alert_empty_task_name_eng)
 

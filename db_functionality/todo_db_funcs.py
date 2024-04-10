@@ -70,7 +70,7 @@ def save_new_task(one_task_obj: OneTask):
 
 
 def update_task(one_task_obj: OneTask):
-    with sq.connect("../storages/todo_db.db") as db_con:
+    with sq.connect(todo_db_filepath) as db_con:
         cur = db_con.cursor()
         query = (f"UPDATE {todo_table_name} SET "
                  f"task_name = ?, "
@@ -89,13 +89,13 @@ def update_task(one_task_obj: OneTask):
         db_con.commit()
 
 
-dd = OneTask()
-dd.task_id = str(7)
-dd.task_name = 'test'
-dd.task_description = 'test'
-dd.task_status = str(1)
-dd.task_due_date = "2024-04-08"
-update_task(dd)
+# dd = OneTask()
+# dd.task_id = str(7)
+# dd.task_name = 'test'
+# dd.task_description = 'test'
+# dd.task_status = str(1)
+# dd.task_due_date = "2024-04-08"
+# update_task(dd)
 
 
 def remove_task_by_id(task_id):
